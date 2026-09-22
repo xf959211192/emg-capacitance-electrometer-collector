@@ -10,7 +10,7 @@ Windows x64 多通道信号采集软件，支持 EMG、电容和静电计三种 
 
 请从 [Releases](https://github.com/xf959211192/emg-capacitance-electrometer-collector/releases/latest) 下载：
 
-`EMG电容静电计采集软件_普通版_v17_含详细说明.zip`
+`EMG-Capacitance-Electrometer-Collector-v17-win-x64.zip`
 
 普通版已经包含 .NET 运行环境。下载后必须完整解压，再双击
 `EMG电容静电计采集软件.exe`。不要只复制或单独发送 EXE，目录中的 DLL
