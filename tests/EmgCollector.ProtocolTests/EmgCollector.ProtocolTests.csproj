@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../src/EmgCollector/Protocol/EmgPacket.cs" Link="Protocol/EmgPacket.cs" />
+    <Compile Include="../../src/EmgCollector/Protocol/EmgPacketParser.cs" Link="Protocol/EmgPacketParser.cs" />
+    <Compile Include="../../src/EmgCollector/Protocol/CapacitancePacket.cs" Link="Protocol/CapacitancePacket.cs" />
+    <Compile Include="../../src/EmgCollector/Protocol/CapacitancePacketParser.cs" Link="Protocol/CapacitancePacketParser.cs" />
+    <Compile Include="../../src/EmgCollector/Protocol/ElectrostaticMeasurement.cs" Link="Protocol/ElectrostaticMeasurement.cs" />
+    <Compile Include="../../src/EmgCollector/Acquisition/PacketStatistics.cs" Link="Acquisition/PacketStatistics.cs" />
+    <Compile Include="../../src/EmgCollector/Acquisition/UdpEmgReceiver.cs" Link="Acquisition/UdpEmgReceiver.cs" />
+    <Compile Include="../../src/EmgCollector/Acquisition/UdpCapacitanceReceiver.cs" Link="Acquisition/UdpCapacitanceReceiver.cs" />
+    <Compile Include="../../src/EmgCollector/Recording/CsvRecorder.cs" Link="Recording/CsvRecorder.cs" />
+    <Compile Include="../../src/EmgCollector/Recording/CapacitanceCsvRecorder.cs" Link="Recording/CapacitanceCsvRecorder.cs" />
+    <Compile Include="../../src/EmgCollector/Recording/ElectrostaticCsvRecorder.cs" Link="Recording/ElectrostaticCsvRecorder.cs" />
+  </ItemGroup>
+</Project>
