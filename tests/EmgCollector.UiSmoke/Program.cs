@@ -206,6 +206,42 @@ if (!Descendants(form).OfType<Label>().Any(label => label.Text.StartsWith("CH1 �
 {
     throw new InvalidOperationException("静电计档位提示缺失");
 }
+Button wiringButton = FindControl<Button>(form, "通道与档位图");
+if (!wiringButton.Visible)
+{
+    throw new InvalidOperationException("静电计接线图按钮未显示");
+}
+if (!typeof(MainForm).Assembly.GetManifestResourceNames().Contains(
+        "EmgCollector.Assets.ElectrostaticChannelWiring.png",
+        StringComparer.Ordinal))
+{
+    throw new InvalidOperationException("静电计接线图没有嵌入程序资源");
+}
+string electrostaticWiringOutputPath = Path.Combine(outputDirectory, "electrostatic-wiring-dialog.png");
+using (var closeWiringDialogTimer = new System.Windows.Forms.Timer { Interval = 350 })
+{
+    closeWiringDialogTimer.Tick += (_, _) =>
+    {
+        Form? wiringDialog = Application.OpenForms.Cast<Form>()
+            .FirstOrDefault(openForm => openForm.Text == "静电计通道与档位图");
+        if (wiringDialog is null)
+        {
+            return;
+        }
+
+        using var bitmap = new Bitmap(wiringDialog.Width, wiringDialog.Height);
+        wiringDialog.DrawToBitmap(bitmap, new Rectangle(Point.Empty, wiringDialog.Size));
+        bitmap.Save(electrostaticWiringOutputPath, ImageFormat.Png);
+        closeWiringDialogTimer.Stop();
+        wiringDialog.Close();
+    };
+    closeWiringDialogTimer.Start();
+    wiringButton.PerformClick();
+}
+if (!File.Exists(electrostaticWiringOutputPath))
+{
+    throw new InvalidOperationException("静电计接线图弹窗未成功打开或截图");
+}
 
 start = FindControl<Button>(form, "开始采集");
 start.PerformClick();
@@ -242,7 +278,7 @@ while (DateTime.Now < deadline)
     Thread.Sleep(20);
 }
 
-Console.WriteLine($"界面冒烟检查通过：{outputPath}；{overlayOutputPath}；{fewChannelsOutputPath}；{capacitanceOutputPath}；{capacitanceOverlayOutputPath}；{electrostaticOutputPath}；{electrostaticOverlayOutputPath}");
+Console.WriteLine($"界面冒烟检查通过：{outputPath}；{overlayOutputPath}；{fewChannelsOutputPath}；{capacitanceOutputPath}；{capacitanceOverlayOutputPath}；{electrostaticOutputPath}；{electrostaticOverlayOutputPath}；{electrostaticWiringOutputPath}");
 form.Close();
 Application.DoEvents();
 return 0;

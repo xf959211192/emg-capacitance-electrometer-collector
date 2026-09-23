@@ -23,11 +23,26 @@ public static class ElectrostaticMeasurement
         "CH8 电压"
     ];
 
-    private static readonly string[] ChannelUnits = ["μA", "nC", "μA", "μA", "μA", "V", "V", "V"];
+    private static readonly string[] FixedChannelUnits = ["", "nC", "μA", "μA", "μA", "V", "V", "V"];
 
     public static string GetChannelName(int channel) => ChannelNames[ValidateChannel(channel)];
 
-    public static string GetUnit(int channel) => ChannelUnits[ValidateChannel(channel)];
+    public static string GetUnit(int channel, ElectrostaticCurrentRange currentRange)
+    {
+        ValidateChannel(channel);
+        if (channel != 0)
+        {
+            return FixedChannelUnits[channel];
+        }
+
+        return currentRange switch
+        {
+            ElectrostaticCurrentRange.Nanoampere => "nA",
+            ElectrostaticCurrentRange.Microampere => "μA",
+            ElectrostaticCurrentRange.Milliampere => "mA",
+            _ => throw new ArgumentOutOfRangeException(nameof(currentRange))
+        };
+    }
 
     public static double GetValue(
         EmgPacket packet,
@@ -49,11 +64,13 @@ public static class ElectrostaticMeasurement
         ValidateChannel(channel);
         return channel switch
         {
+            // 厂家换算关系原本统一换算为 μA：nA 档×1、μA 档×1000、mA 档×1000000。
+            // 改为随档位显示 nA/μA/mA 后，需要同步换算单位，因此三档显示值均为基础值×1000。
             0 => currentRange switch
             {
-                ElectrostaticCurrentRange.Nanoampere => 1d,
+                ElectrostaticCurrentRange.Nanoampere => 1_000d,
                 ElectrostaticCurrentRange.Microampere => 1_000d,
-                ElectrostaticCurrentRange.Milliampere => 1_000_000d,
+                ElectrostaticCurrentRange.Milliampere => 1_000d,
                 _ => throw new ArgumentOutOfRangeException(nameof(currentRange))
             },
             1 => 10d,

@@ -55,7 +55,7 @@ public sealed class ElectrostaticCsvRecorder : IDisposable
                     header.Append(',')
                         .Append(ElectrostaticMeasurement.GetChannelName(channel).Replace(" ", string.Empty, StringComparison.Ordinal))
                         .Append('_')
-                        .Append(ElectrostaticMeasurement.GetUnit(channel));
+                        .Append(ElectrostaticMeasurement.GetUnit(channel, _currentRange));
                 }
             }
             _writer.WriteLine(header.ToString());

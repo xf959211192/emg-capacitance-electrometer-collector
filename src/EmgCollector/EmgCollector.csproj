@@ -8,4 +8,9 @@
     <AssemblyName>EMG电容静电计采集软件</AssemblyName>
     <RootNamespace>EmgCollector</RootNamespace>
   </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Assets/electrostatic-channel-wiring.png"
+                      LogicalName="EmgCollector.Assets.ElectrostaticChannelWiring.png" />
+  </ItemGroup>
 </Project>

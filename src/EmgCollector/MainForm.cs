@@ -33,6 +33,7 @@ public sealed class MainForm : Form
     private readonly Button _recordButton = new() { Text = "开始录制", AutoSize = true, Padding = new Padding(8, 3, 8, 3), Enabled = false };
     private readonly Button _clearButton = new() { Text = "清空波形", AutoSize = true, Padding = new Padding(8, 3, 8, 3) };
     private readonly Button _firewallButton = new() { Text = "配置防火墙", AutoSize = true, Padding = new Padding(8, 3, 8, 3) };
+    private readonly Button _electrostaticWiringButton = new() { Text = "通道与档位图", AutoSize = true, Padding = new Padding(8, 3, 8, 3), Visible = false };
     private readonly Button _connectWifiButton = new() { Text = "连接板卡 Wi-Fi", AutoSize = true, Padding = new Padding(8, 3, 8, 3) };
     private readonly Button _pauseWifiButton = new() { Text = "暂停连接", AutoSize = true, Padding = new Padding(8, 3, 8, 3), Enabled = false };
     private readonly Button _restoreWifiButton = new() { Text = "恢复原 Wi-Fi", AutoSize = true, Padding = new Padding(8, 3, 8, 3), Enabled = false };
@@ -113,11 +114,13 @@ public sealed class MainForm : Form
         _recordButton.Click += (_, _) => ToggleRecording();
         _clearButton.Click += (_, _) => ClearWaveforms();
         _firewallButton.Click += async (_, _) => await ConfigureFirewallAsync();
+        _electrostaticWiringButton.Click += (_, _) => ShowElectrostaticWiringDiagram();
         _connectWifiButton.Click += async (_, _) => await ConnectPreferredBoardWifiAsync(showFailureMessage: true);
         _pauseWifiButton.Click += (_, _) => PauseWifiConnection();
         _restoreWifiButton.Click += async (_, _) => await RestoreOriginalWifiAsync();
         _modeBox.SelectedIndexChanged += async (_, _) => await ChangeModeAsync();
         _sampleRateBox.TextChanged += (_, _) => OnSampleRateTextChanged();
+        _electrostaticRangeBox.SelectedIndexChanged += (_, _) => OnElectrostaticRangeChanged();
         _portBox.ValueChanged += (_, _) => OnPortChanged();
         _windowBox.ValueChanged += (_, _) => ApplyDisplaySettings();
         _waveformTabs.SelectedIndexChanged += (_, _) => InvalidateActiveWaveform();
@@ -221,6 +224,7 @@ public sealed class MainForm : Form
         toolbar.Controls.Add(_recordButton);
         toolbar.Controls.Add(_clearButton);
         toolbar.Controls.Add(_firewallButton);
+        toolbar.Controls.Add(_electrostaticWiringButton);
         toolbar.Controls.Add(_stateLabel);
         toolbar.Controls.Add(_deviceStatusLabel);
 
@@ -272,6 +276,7 @@ public sealed class MainForm : Form
             _portBox.Enabled = IsElectrostaticMode;
             _electrostaticRangeLabel.Visible = IsElectrostaticMode;
             _electrostaticRangeBox.Visible = IsElectrostaticMode;
+            _electrostaticWiringButton.Visible = IsElectrostaticMode;
             _sampleRateBox.Text = CurrentMode switch
             {
                 SignalMode.Capacitance => _capacitanceSampleRateText,
@@ -283,7 +288,7 @@ public sealed class MainForm : Form
                 SignalMode.Capacitance =>
                     "电容测量范围 0～约 1.5 nF，每通道采样率 100 Hz；依据厂家 pF 曲线和三位小数数据，按原始值 ÷ 1000 显示和导出 pF。",
                 SignalMode.Electrostatic =>
-                    "CH1 档位必须与板上拨码一致。默认 1 kHz，可选 8060/8080 端口。",
+                    "CH1 档位必须与板上拨码一致，纵轴和 CSV 单位随档位显示为 nA、μA 或 mA。默认 1 kHz，可选 8060/8080 端口。",
                 _ => string.Empty
             };
             _errorLabel.Text = string.Empty;
@@ -303,7 +308,9 @@ public sealed class MainForm : Form
             string[] units = CurrentMode switch
             {
                 SignalMode.Capacitance => Enumerable.Repeat("pF", labels.Length).ToArray(),
-                SignalMode.Electrostatic => Enumerable.Range(0, labels.Length).Select(ElectrostaticMeasurement.GetUnit).ToArray(),
+                SignalMode.Electrostatic => Enumerable.Range(0, labels.Length)
+                    .Select(channel => ElectrostaticMeasurement.GetUnit(channel, CurrentElectrostaticRange))
+                    .ToArray(),
                 _ => Enumerable.Repeat("V", labels.Length).ToArray()
             };
             string overlayUnit = IsElectrostaticMode ? "混合单位" : units[0];
@@ -319,6 +326,22 @@ public sealed class MainForm : Form
         {
             _applyingMode = false;
         }
+    }
+
+    private void ShowElectrostaticWiringDiagram()
+    {
+        using var dialog = new ElectrostaticWiringDialog();
+        dialog.ShowDialog(this);
+    }
+
+    private void OnElectrostaticRangeChanged()
+    {
+        if (_applyingMode || _running || !IsElectrostaticMode)
+        {
+            return;
+        }
+
+        ApplyMode();
     }
 
     private void RebuildChannelSwitches(IReadOnlyList<string> labels, IReadOnlyList<bool> references)

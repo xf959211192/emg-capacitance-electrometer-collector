@@ -323,10 +323,13 @@ static void ElectrostaticConversions()
     double ch5Base = 5000 / EmgPacket.AdcCountsPerVolt;
 
     Assert(ElectrostaticMeasurement.GetChannelName(1) == "CH2 电荷", "静电计 CH2 名称错误");
-    Assert(ElectrostaticMeasurement.GetUnit(0) == "μA" && ElectrostaticMeasurement.GetUnit(1) == "nC", "静电计通道单位错误");
-    Assert(Math.Abs(ElectrostaticMeasurement.GetValue(packet!, 0, 0, ElectrostaticCurrentRange.Nanoampere) - ch1Base) < 1e-12, "CH1 nA 档换算错误");
+    Assert(ElectrostaticMeasurement.GetUnit(0, ElectrostaticCurrentRange.Nanoampere) == "nA", "CH1 nA 档单位错误");
+    Assert(ElectrostaticMeasurement.GetUnit(0, ElectrostaticCurrentRange.Microampere) == "μA", "CH1 μA 档单位错误");
+    Assert(ElectrostaticMeasurement.GetUnit(0, ElectrostaticCurrentRange.Milliampere) == "mA", "CH1 mA 档单位错误");
+    Assert(ElectrostaticMeasurement.GetUnit(1, ElectrostaticCurrentRange.Nanoampere) == "nC", "静电计 CH2 单位错误");
+    Assert(Math.Abs(ElectrostaticMeasurement.GetValue(packet!, 0, 0, ElectrostaticCurrentRange.Nanoampere) - ch1Base * 1000) < 1e-12, "CH1 nA 档换算错误");
     Assert(Math.Abs(ElectrostaticMeasurement.GetValue(packet!, 0, 0, ElectrostaticCurrentRange.Microampere) - ch1Base * 1000) < 1e-12, "CH1 μA 档换算错误");
-    Assert(Math.Abs(ElectrostaticMeasurement.GetValue(packet!, 0, 0, ElectrostaticCurrentRange.Milliampere) - ch1Base * 1_000_000) < 1e-9, "CH1 mA 档换算错误");
+    Assert(Math.Abs(ElectrostaticMeasurement.GetValue(packet!, 0, 0, ElectrostaticCurrentRange.Milliampere) - ch1Base * 1000) < 1e-12, "CH1 mA 档换算错误");
     Assert(Math.Abs(ElectrostaticMeasurement.GetValue(packet!, 1, 0, ElectrostaticCurrentRange.Nanoampere) - ch2Base * 10) < 1e-12, "CH2 电荷换算错误");
     Assert(Math.Abs(ElectrostaticMeasurement.GetValue(packet!, 3, 0, ElectrostaticCurrentRange.Nanoampere) - ch4Base * 0.1) < 1e-12, "CH4 电流换算错误");
     Assert(Math.Abs(ElectrostaticMeasurement.GetValue(packet!, 4, 0, ElectrostaticCurrentRange.Nanoampere) - ch5Base * 0.01) < 1e-12, "CH5 电流换算错误");
